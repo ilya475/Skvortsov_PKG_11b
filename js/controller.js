@@ -133,8 +133,6 @@ function recalculate(source, values) {
   setModelValues('xyz', state.xyz);
   setModelValues('hsv', state.hsv);
 
-  // Dynamic slider previews: every point on each track shows the colour
-  // produced by moving only that channel while the other channels stay fixed.
   setRangeGradients('rgb', buildRangeGradients('rgb'));
   setRangeGradients('xyz', buildRangeGradients('xyz'));
   setRangeGradients('hsv', buildRangeGradients('hsv'));
@@ -161,7 +159,6 @@ function hexToRgb(hex) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-// Expose a tiny read-only API for the browser micro-tests.
 window.__lab8 = { state, recalculate };
 
 setup();
