@@ -1,8 +1,3 @@
-/*
- * Model: pure colour mathematics for laboratory work, variant 8.
- * Route is STRICTLY: RGB <-> XYZ <-> HSV.
- * No conversion library is used.
- */
 
 export const ILLUMINANTS = {
   D65: { name: 'D65 — средний дневной свет', x: 0.3127, y: 0.3290 },
@@ -10,8 +5,6 @@ export const ILLUMINANTS = {
   E:   { name: 'E — равноэнергетический источник', x: 1 / 3, y: 1 / 3 }
 };
 
-// sRGB primaries; the transformation matrix itself is recalculated from them
-// and the selected illuminant white point every time the illuminant changes.
 const PRIMARIES = {
   R: { x: 0.64, y: 0.33 },
   G: { x: 0.30, y: 0.60 },
@@ -61,13 +54,11 @@ export function invert3x3(m) {
 }
 
 function whitePointXYZ(illuminant) {
-  // D65 white point is given explicitly in the supplied formula sheet.
   if (illuminant === ILLUMINANTS.D65) return [95.047, 100, 108.883];
   const { x, y } = illuminant;
   return [100 * x / y, 100, 100 * (1 - x - y) / y];
 }
 
-/** Build RGB->XYZ matrix from RGB primaries and the current white point. */
 export function buildRgbToXyzMatrix(illuminantKey = 'D65') {
   const illuminant = ILLUMINANTS[illuminantKey] ?? ILLUMINANTS.D65;
   const p = [
@@ -75,7 +66,7 @@ export function buildRgbToXyzMatrix(illuminantKey = 'D65') {
     [PRIMARIES.G.x / PRIMARIES.G.y, 1, (1 - PRIMARIES.G.x - PRIMARIES.G.y) / PRIMARIES.G.y],
     [PRIMARIES.B.x / PRIMARIES.B.y, 1, (1 - PRIMARIES.B.x - PRIMARIES.B.y) / PRIMARIES.B.y]
   ];
-  // P is arranged as rows in the code, so transpose it to get primary columns.
+ 
   const P = [
     [p[0][0], p[1][0], p[2][0]],
     [p[0][1], p[1][1], p[2][1]],
@@ -93,13 +84,11 @@ export function buildXyzToRgbMatrix(illuminantKey = 'D65') {
   return invert3x3(buildRgbToXyzMatrix(illuminantKey));
 }
 
-// Formula from the supplied PDF for RGB -> XYZ: sRGB gamma decoding.
 export function gammaDecode(v255) {
   const x = v255 / 255;
   return x >= 0.04045 ? ((x + 0.055) / 1.055) ** 2.4 : x / 12.92;
 }
 
-// Formula from the supplied PDF for XYZ -> RGB: sRGB gamma encoding.
 export function gammaEncode(linear) {
   const x = linear;
   return x >= 0.0031308 ? 1.055 * (x ** (1 / 2.4)) - 0.055 : 12.92 * x;
@@ -132,8 +121,6 @@ export function xyzToRgb(xyz, illuminantKey = 'D65', strategy = 'clipping') {
   return { rgb, linear, outOfGamut };
 }
 
-// HSV algorithm follows the supplied flowchart: V=max(R,G,B), M2 branch,
-// S=0 branch, then six hue sectors.
 export function rgbToHsv(rgb) {
   const [r, g, b] = rgb.map(v => clamp(v / 255));
   const max = Math.max(r, g, b);
@@ -181,11 +168,6 @@ export function hexFromRgb(rgb) {
 export function matrixToText(m) {
   return m.map(row => row.map(v => v.toFixed(6)).join('  ')).join('\n');
 }
-
-
-// Direct XYZ ↔ HSV equations for this assignment. The equations inline the
-// XYZ↔linear-RGB matrix and sRGB gamma functions instead of calling another
-// colour-model conversion function as a hidden intermediary.
 export function xyzToHsv(xyz, illuminantKey = 'D65') {
   const linear = multiplyMatrixVector(buildXyzToRgbMatrix(illuminantKey), xyz.map(v => v / 100));
   const encoded = linear.map(v => clamp(gammaEncode(Math.max(0, v))));
@@ -244,7 +226,6 @@ export function calculateFromHsv(hsv, illuminant, strategy) {
   return { rgb: formatRgb(rgb), xyz, hsv, matrix: buildRgbToXyzMatrix(illuminant), inverseMatrix: buildXyzToRgbMatrix(illuminant), gamut: converted };
 }
 
-/* Legacy RGB/HSV helpers remain available for unit tests and the palette. */
 export function calculateFromHsvLegacy(hsv, illuminant, strategy) {
   const rgb = hsvToRgb(hsv);
   const xyz = rgbToXyz(rgb, illuminant);
