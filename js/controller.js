@@ -123,9 +123,9 @@ function recalculate(source, values) {
   if (source === 'xyz') result = calculateFromXyz(values, state.illuminant, state.gamutStrategy);
   if (source === 'hsv') result = calculateFromHsv(values, state.illuminant, state.gamutStrategy);
 
-  state.rgb = result.rgb.map(v => Math.round(v));
-  state.xyz = result.xyz.map(v => Math.round(v));
-  state.hsv = result.hsv.map(v => Math.round(v));
+   state.rgb = result.rgb.slice();
+  state.xyz = result.xyz.slice();
+  state.hsv = result.hsv.slice();
 
   setModelValues('rgb', state.rgb);
   setModelValues('xyz', state.xyz);
