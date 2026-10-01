@@ -4,16 +4,16 @@ export const MODEL_CONFIG = {
     { key: 'G', label: 'G', min: 0, max: 255, step: 1, unit: '' },
     { key: 'B', label: 'B', min: 0, max: 255, step: 1, unit: '' }
   ],
-  xyz: [
-    { key: 'X', label: 'X', min: -20, max: 150, step: 0.001, unit: '' },
-    { key: 'Y', label: 'Y', min: -20, max: 150, step: 0.001, unit: '' },
-    { key: 'Z', label: 'Z', min: -20, max: 150, step: 0.001, unit: '' }
-  ],
+ xyz: [
+  { key: 'X', label: 'X', min: -20, max: 150, step: 1, unit: '' },
+  { key: 'Y', label: 'Y', min: -20, max: 150, step: 1, unit: '' },
+  { key: 'Z', label: 'Z', min: -20, max: 150, step: 1, unit: '' }
+],
   hsv: [
-    { key: 'H', label: 'H', min: 0, max: 360, step: 0.1, unit: '°' },
-    { key: 'S', label: 'S', min: 0, max: 100, step: 0.1, unit: '%' },
-    { key: 'V', label: 'V', min: 0, max: 100, step: 0.1, unit: '%' }
-  ]
+  { key: 'H', label: 'H', min: 0, max: 360, step: 1, unit: '°' },
+  { key: 'S', label: 'S', min: 0, max: 100, step: 1, unit: '%' },
+  { key: 'V', label: 'V', min: 0, max: 100, step: 1, unit: '%' }
+]
 };
 
 export function createChannels(container, model) {
