@@ -45,7 +45,7 @@ export function setModelValues(model, values) {
 }
 
 function formatInput(value, step) {
-  return step < 1 ? Number(value).toFixed(step === 0.001 ? 3 : 1) : Math.round(value);
+  return Math.round(value);
 }
 
 export function setRangeGradients(model, gradients) {
