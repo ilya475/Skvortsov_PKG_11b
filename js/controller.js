@@ -53,13 +53,11 @@ function buildPalette() {
 function bindEvents() {
   document.getElementById('illuminant').addEventListener('change', e => {
     state.illuminant = e.target.value;
-    // Same current RGB is the stable physical colour representation for recalculation.
     recalculate('rgb', state.rgb);
   });
 
   document.getElementById('gamutStrategy').addEventListener('change', e => {
     state.gamutStrategy = e.target.value;
-    // Re-run from the last source so a strategy change is visible immediately.
     recalculate(state.source, state[state.source]);
   });
 
@@ -125,9 +123,9 @@ function recalculate(source, values) {
   if (source === 'xyz') result = calculateFromXyz(values, state.illuminant, state.gamutStrategy);
   if (source === 'hsv') result = calculateFromHsv(values, state.illuminant, state.gamutStrategy);
 
-  state.rgb = result.rgb.slice();
-  state.xyz = result.xyz.slice();
-  state.hsv = result.hsv.slice();
+  state.rgb = result.rgb.map(v => Math.round(v));
+  state.xyz = result.xyz.map(v => Math.round(v));
+  state.hsv = result.hsv.map(v => Math.round(v));
 
   setModelValues('rgb', state.rgb);
   setModelValues('xyz', state.xyz);
