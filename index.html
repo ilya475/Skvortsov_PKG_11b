@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Лабораторная работа № 4 — Растровые алгоритмы</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><a class="brand" href="#"><span class="logo">Р</span> Лабораторная работа № 4</a><nav><a href="#lab">Алгоритмы</a><a href="#benchmark">Проверка скорости</a><a href="report.html">Отчёт</a></nav></header>
+<main>
+<section class="hero simple-hero"><div class="eyebrow">КОМПЬЮТЕРНАЯ ГРАФИКА</div><h1>Растровые<br><span>алгоритмы</span></h1><p>Построение отрезков и кривых на координатной сетке. Выберите алгоритм, задайте параметры и нажмите «Построить».</p></section>
+<section id="lab" class="section"><div class="section-head"><div><h2>Построение</h2></div><p>Закрашенные клетки показывают результат работы алгоритма.</p></div>
+<div class="workspace"><aside class="controls"><label>Алгоритм<select id="algorithm"><option value="dda">Цифровой дифференциальный анализатор (ЦДА)</option><option value="bres">Брезенхем — отрезок</option><option value="wu">Ву — сглаженная линия</option><option value="circle">Брезенхем — окружность</option><option value="ellipse">Эллипс — целочисленный алгоритм средней точки</option></select></label>
+<div id="lineFields"><div class="field-grid"><label>x₀<input id="x0" type="number" value="-12" min="-30" max="30"></label><label>y₀<input id="y0" type="number" value="-7" min="-30" max="30"></label><label>x₁<input id="x1" type="number" value="13" min="-30" max="30"></label><label>y₁<input id="y1" type="number" value="11" min="-30" max="30"></label></div></div>
+<div id="circleFields" class="hidden"><div class="field-grid"><label>Центр X<input id="cx" type="number" value="0" min="-30" max="30"></label><label>Центр Y<input id="cy" type="number" value="0" min="-30" max="30"></label><label>Радиус<input id="radius" type="number" value="10" min="1" max="30"></label><label>Полуось X<input id="rx" type="number" value="14" min="1" max="30"></label><label>Полуось Y<input id="ry" type="number" value="8" min="1" max="30"></label></div></div>
+<label>Масштаб ячейки <span id="scaleVal" class="value">18 px</span><input id="scale" type="range" min="10" max="30" value="18"></label>
+<div class="button-row"><button id="draw" class="btn primary">Построить</button><button id="clear" class="btn secondary">Очистить</button></div>
+<div class="hint"><b>Сетка координат</b><p>Начало координат находится в центре. X направлен вправо, Y — вверх.</p></div>
+<div class="legend"><span><i class="dot full"></i> Пиксель</span><span><i class="dot soft"></i> Частичная интенсивность</span></div>
+</aside><div class="canvas-wrap"><div class="canvas-top"><span id="methodName">ЦДА</span><span id="pixelCount">0 пикселей</span></div><canvas id="grid" width="900" height="650" aria-label="Виртуальная растровая сетка"></canvas><div class="canvas-foot"><span id="coords">Координатная сетка</span><span id="elapsed">Время алгоритма: —</span></div></div></div>
+<div class="explain-grid"><article><h3>Как проверить</h3><p>Попробуйте разные координаты, в том числе горизонтальные, вертикальные и диагональные отрезки.</p></article><article><h3>Виртуальный растр</h3><p>Алгоритм сначала записывает значения в массив, а затем результат показывается на сетке.</p></article></div>
+</section>
+<section id="benchmark" class="section benchmark"><div class="section-head"><div><h2>Сравнение скорости</h2></div><p>Время измеряется в этом браузере и зависит от компьютера.</p></div>
+<div class="bench-panel"><div class="bench-intro"><div><h3>Тест алгоритмов</h3><p>Запустите тест, чтобы получить свои результаты.</p></div><button id="runBench" class="btn primary">Запустить стресс-тест</button></div><div id="benchStatus" class="status">Тест ещё не запускался.</div><h4>Время в зависимости от числа отрезков</h4><div class="chart-box"><canvas id="chart" width="900" height="330"></canvas></div><h4>Время в зависимости от длины отрезка</h4><p class="note">Для каждого значения длины измеряется обработка 5 000 отрезков. Координаты выходят за границы видимой сетки, чтобы проверить работу алгоритмов на длинных отрезках; в бенчмарке учитывается только вычисление виртуального растра.</p><div class="chart-box"><canvas id="lengthChart" width="900" height="330"></canvas></div><div class="bench-results" id="benchResults"><p>После запуска здесь появятся измеренные значения.</p></div><button id="downloadCsv" class="btn secondary" disabled>Скачать CSV результатов</button></div>
+<div class="note"><b>Методика.</b> Используется <code>performance.now()</code>. Время измеряется вокруг вычисления примитивов; визуализация canvas не входит в критическую секцию. Для воспроизводимости запускайте тест несколько раз в одинаковых условиях и сравнивайте медиану.</div>
+</section>
+<section class="section bottom-cta"><div><h2>Отчёт</h2><p>Описание задачи, алгоритмов и результатов измерений.</p></div><a class="btn primary" href="report.html">Открыть отчёт</a></section>
+</main><footer><span>RasterLab · Лабораторная работа № 4</span><span>Скворцов Илья · группа 11b · 2026</span></footer>
+<script src="app.js"></script>
+</body></html>
