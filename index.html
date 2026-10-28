@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лабораторная работа №2 — Анализ растровых графических файлов</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-content">
+      <div class="logo-area">
+        <span class="badge">БГУ · ФПМИ / КСиС</span>
+        <h1>Image Metadata Inspector <span class="sub-version">v2.2 (Папка + Отдельные фото)</span></h1>
+      </div>
+      <div class="student-card">
+        <div class="student-name">Скворцов Илья</div>
+        <div class="student-meta">Лабораторная работа №2</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="control-panel">
+      <div class="action-box">
+        <!-- 1. Выбрать папку -->
+        <label for="folderInput" class="btn btn-primary" title="Выбрать каталог целиком (до 100 000 файлов)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Выбрать папку
+        </label>
+        <input id="folderInput" type="file" webkitdirectory directory multiple hidden>
+
+        <!-- 2. Выбрать фото / файлы -->
+        <label for="fileInput" class="btn btn-files" title="Выбрать одно или несколько конкретных изображений">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Выбрать фото / файлы
+        </label>
+        <input id="fileInput" type="file" multiple accept=".jpg,.jpeg,.png,.gif,.bmp,.tif,.tiff,.pcx,*/*" hidden>
+
+        <!-- Сервисные кнопки -->
+        <button id="clearBtn" class="btn btn-secondary" disabled>Очистить данные</button>
+        <button id="exportBtn" class="btn btn-accent" disabled>Экспорт отчёта (CSV)</button>
+      </div>
+
+      <div class="engine-badge">
+        Режимы: <strong>Папка / Отдельные фото / Drag & Drop</strong> | Web Workers | 0 библиотек
+      </div>
+    </div>
+
+    <!-- Интерактивная зона Drag & Drop -->
+    <div id="dropZone" class="drop-zone">
+      <div class="drop-zone-content">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Перетащите сюда отдельные фото или папку целиком для мгновенного анализа</span>
+      </div>
+    </div>
+
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">Всего файлов</span>
+        <span class="metric-val" id="totalCount">0</span>
+      </div>
+      <div class="metric-card ok-card">
+        <span class="metric-label">Успешно распознано</span>
+        <span class="metric-val" id="doneCount">0</span>
+      </div>
+      <div class="metric-card error-card">
+        <span class="metric-label">Битые / Ошибки</span>
+        <span class="metric-val" id="badCount">0</span>
+      </div>
+      <div class="metric-card time-card">
+        <span class="metric-label">Время анализа</span>
+        <span class="metric-val" id="elapsed">0.0 c</span>
+      </div>
+    </section>
+
+    <div class="progress-container">
+      <div class="progress-info">
+        <span id="progressText">Ожидание выбора файлов или каталога...</span>
+        <strong id="progressPercent">0%</strong>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <section class="table-section">
+      <div class="filter-toolbar">
+        <div class="filter-group">
+          <input id="search" type="text" placeholder="Поиск по имени файла или формату...">
+        </div>
+        <div class="filter-group select-group">
+          <select id="statusFilter">
+            <option value="all">Все статусы</option>
+            <option value="ok">Только корректные (OK)</option>
+            <option value="bad">Только с ошибками</option>
+          </select>
+          <select id="formatFilter">
+            <option value="all">Все форматы</option>
+            <option value="JPEG">JPEG</option>
+            <option value="PNG">PNG</option>
+            <option value="GIF">GIF</option>
+            <option value="BMP">BMP</option>
+            <option value="TIFF">TIFF</option>
+            <option value="PCX">PCX</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pagination-header">
+        <span id="pageInfo">Нет записей для отображения</span>
+        <div class="pagination-controls">
+          <button id="prevPage" class="btn-page" disabled>← Предыдущая</button>
+          <button id="nextPage" class="btn-page" disabled>Следующая →</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th width="48">Вид</th>
+              <th>Имя файла</th>
+              <th width="80">Формат</th>
+              <th>Размер (WxH)</th>
+              <th>Разрешение</th>
+              <th>Глубина цвета</th>
+              <th>Сжатие</th>
+              <th width="90">Статус</th>
+              <th>Диагностика / Пояснение</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody">
+            <tr class="empty-state">
+              <td colspan="9">Выберите отдельные фото или папку с изображениями для запуска анализа.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      БГУ · Лабораторная работа №2 «Чтение информации из графических файлов» · Скворцов Илья
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
