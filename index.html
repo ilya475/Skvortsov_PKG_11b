@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <title>RasterLab — анализ графических файлов</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="RasterLab — главная">
+        <span class="brand-mark">R</span>
+        <span><b>RasterLab</b><small>ИССЛЕДОВАНИЕ ФОРМАТОВ ИЗОБРАЖЕНИЙ</small></span>
+      </a>
+      <div class="student-tag"><span class="online-dot"></span> Скворцов Илья</div>
+    </header>
+
+    <main class="container">
+      <section class="intro">
+        <div>
+          <div class="eyebrow">ЛАБОРАТОРНАЯ РАБОТА № 2</div>
+          <h1>Что скрыто<br><span>внутри изображения?</span></h1>
+          <p>Чтение метаданных растровых файлов напрямую из бинарной структуры — без сторонних библиотек-парсеров.</p>
+        </div>
+        <div class="intro-art" aria-hidden="true">
+          <div class="pixel-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="art-caption">RAW DATA <span>→</span> METADATA</div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="side-panel">
+          <div class="panel-heading"><span class="step">01</span><div><h2>Источник данных</h2><p>Выберите файлы для исследования</p></div></div>
+          <label class="drop-zone" for="folderInput">
+            <span class="upload-icon">↥</span>
+            <b>Загрузить папку</b>
+            <span>Выберите каталог с изображениями</span>
+            <small>Можно выбрать до 100 000 файлов</small>
+          </label>
+          <input id="folderInput" type="file" webkitdirectory directory multiple hidden>
+          <div class="or-line"><span>или</span></div>
+          <label class="file-button" for="filesInput">＋ Добавить отдельные файлы</label>
+          <input id="filesInput" type="file" multiple accept=".jpg,.jpeg,.gif,.tif,.tiff,.bmp,.png,.pcx" hidden>
+          <div class="format-box">
+            <span class="mini-label">ПОДДЕРЖИВАЕМЫЕ ФОРМАТЫ</span>
+            <div class="format-chips"><span>JPG</span><span>PNG</span><span>GIF</span><span>TIFF</span><span>BMP</span><span>PCX</span></div>
+          </div>
+          <button id="clearBtn" class="clear-button" disabled>Очистить результаты</button>
+          <div class="privacy-note"><span>◇</span> Файлы анализируются локально в браузере и не отправляются на сервер.</div>
+        </aside>
+
+        <div class="main-panel">
+          <section class="progress-card">
+            <div class="panel-heading"><span class="step">02</span><div><h2>Ход эксперимента</h2><p id="progressText">Ожидание файлов</p></div><strong id="progressPercent" class="percent">0%</strong></div>
+            <div class="progress-track"><div id="progressBar"></div></div>
+            <div class="stats-grid">
+              <div class="metric"><span>Файлов в наборе</span><b id="totalCount">0</b></div>
+              <div class="metric"><span>Успешно прочитано</span><b id="doneCount">0</b></div>
+              <div class="metric"><span>Ошибки структуры</span><b id="badCount">0</b></div>
+              <div class="metric"><span>Время анализа</span><b id="elapsed">0.0 с</b></div>
+            </div>
+          </section>
+
+          <section class="results-card">
+            <div class="results-title">
+              <div class="panel-heading"><span class="step">03</span><div><h2>Полученные данные</h2><p>Результаты побайтового анализа файлов</p></div></div>
+              <button id="exportBtn" class="export-button" disabled>↓ Экспорт CSV</button>
+            </div>
+            <div class="filters">
+              <label class="search-field"><span>Поиск</span><input id="search" type="search" placeholder="Имя файла, формат или примечание…"></label>
+              <label><span>Состояние</span><select id="statusFilter"><option value="all">Все результаты</option><option value="ok">Корректные</option><option value="bad">С ошибками</option></select></label>
+              <label><span>Формат</span><select id="formatFilter"><option value="all">Все форматы</option><option>JPEG</option><option>PNG</option><option>GIF</option><option>TIFF</option><option>BMP</option><option>PCX</option></select></label>
+            </div>
+            <div class="table-meta"><span id="pageInfo">Результатов пока нет</span><div class="pagination"><button id="prevPage" disabled>←</button><button id="nextPage" disabled>→</button></div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Файл</th><th>Формат</th><th>Размер, px</th><th>Разрешение, DPI</th><th>Глубина цвета</th><th>Сжатие</th><th>Статус</th><th>Детали</th><th></th></tr></thead>
+                <tbody id="resultsBody"><tr class="empty"><td colspan="9">Загрузите папку или отдельные изображения, чтобы начать эксперимент.</td></tr></tbody>
+              </table>
+            </div>
+            <div class="table-foot">На одной странице отображается не более 100 записей.</div>
+          </section>
+        </div>
+      </section>
+
+      <section class="method-note">
+        <div class="method-symbol">i</div>
+        <div><b>Как читать результаты</b><p>Размеры берутся из заголовков и структурных блоков формата. DPI — из соответствующих полей метаданных. Если физическое разрешение в файле не задано, приложение показывает «не задано», а не подменяет его расчётным значением.</p></div>
+      </section>
+    </main>
+    <footer><span>RasterLab · Лабораторная работа № 2</span><span>Ручной парсинг · Web Workers · Lazy Reading</span></footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
