@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RasterLab — лабораторная №4</title><link rel="stylesheet" href="style.css"></head><body>
+<header><div><div class="eyebrow">КОМПЬЮТЕРНАЯ ГРАФИКА · ЛАБОРАТОРНАЯ №4</div><h1>RasterLab</h1><p>Базовые растровые алгоритмы и анализ производительности</p></div><span class="tag">Virtual Raster</span></header>
+<main>
+<section class="panel controls"><h2>Параметры примитива</h2><div class="fields">
+<label>Алгоритм<select id="algorithm"><option value="step">Пошаговый алгоритм</option><option value="dda">ЦДА (DDA)</option><option value="bres" selected>Брезенхем — отрезок</option><option value="wu">Ву — сглаживание</option><option value="circle">Брезенхем — окружность</option><option value="pit">Кастла–Питтвея — эллипс</option></select></label>
+<label>X₀ / центр<input id="x0" type="number" value="-12"></label><label>Y₀ / центр<input id="y0" type="number" value="-7"></label>
+<label>X₁<input id="x1" type="number" value="15"></label><label>Y₁<input id="y1" type="number" value="9"></label>
+<div id="circleFields" hidden><label>Радиус<input id="radius" type="number" min="1" max="140" value="9"></label></div>
+<div id="ellipseFields" hidden><label>Полуось X<input id="rx" type="number" min="1" max="180" value="15"></label><label>Полуось Y<input id="ry" type="number" min="1" max="130" value="9"></label></div>
+</div><div class="buttons"><button id="drawBtn">Построить</button><button class="secondary" id="exampleBtn">Пример</button><button class="secondary" id="clearBtn">Очистить</button></div><p id="algoInfo" class="hint"></p></section>
+<section class="panel"><div class="section-head"><div><h2>Виртуальная дискретная сетка</h2><p>Каждая ячейка — один пиксель массива 401 × 301</p></div><div class="zoom"><button id="zoomOut">−</button><b id="zoomLabel">12×</b><button id="zoomIn">+</button><button class="secondary" id="resetView">Сброс</button></div></div>
+<div class="canvas-wrap"><canvas id="view" width="1000" height="620"></canvas></div><div class="stats"><span>Время построения: <b id="drawTime">—</b></span><span>Закрашено пикселей: <b id="pixelCount">—</b></span><span>Координаты: целые индексы ячеек</span></div>
+<p class="hint">Начало координат находится в центре. Ось X направлена вправо, ось Y — вверх. Целочисленная координата (x, y) отображается в центре ячейки с индексом (200 + x, 150 − y). Масштаб меняет размер ячейки, а не математические координаты.</p></section>
+<section class="panel"><div class="section-head"><div><h2>Стресс-тест и Benchmark</h2><p>100 000 отрезков во всех октантах + 50 000 окружностей</p></div><button id="benchBtn">Запустить тест</button></div><p id="benchStatus" class="hint">Нажми «Запустить тест». Замеряется только заполнение виртуального растра, без перерисовки интерфейса.</p>
+<div class="charts"><div><h3>Время от числа отрезков</h3><canvas id="countChart" width="540" height="260"></canvas></div><div><h3>Время от длины отрезка</h3><canvas id="lengthChart" width="540" height="260"></canvas></div></div>
+<table id="benchTable"><tr><th>Тест</th><th>Количество</th><th>Время, мс</th></tr></table>
+<p class="hint">В стресс-тесте концы отрезков формируются в восьми октантах по очереди. Все измерения выполняются через performance.now(); итоговые значения зависят от браузера и компьютера.</p></section>
+<section class="panel"><h2>Реализованные методы</h2><div class="method-grid">
+<article><h3>Пошаговый</h3><p>Число шагов N = max(|Δx|, |Δy|); на каждом шаге координаты округляются.</p></article>
+<article><h3>ЦДА</h3><p>xᵢ₊₁ = xᵢ + Δx/N; yᵢ₊₁ = yᵢ + Δy/N. Используются приращения и округление.</p></article>
+<article><h3>Брезенхем</h3><p>Ошибка e = |Δx| − |Δy| управляет выбором соседнего пикселя. Знаки приращений позволяют пройти все октанты.</p></article>
+<article><h3>Окружность</h3><p>Решение принимается по целочисленной переменной d = 3 − 2r. Восемь симметричных точек строятся за один шаг.</p></article>
+<article><h3>Ву (Wu)</h3><p>Два пикселя получают интенсивности 1 − f и f, где f — дробная часть координаты; это обеспечивает плавную границу.</p></article>
+<article><h3>Кастла–Питтвея</h3><p>Целочисленный midpoint-подход для конического сечения (эллипса): две области и четырёхкратная симметрия.</p></article>
+</div></section>
+</main><footer>RasterLab · Лабораторная работа №4 · Скворцов Илья</footer><script src="app.js"></script></body></html>
