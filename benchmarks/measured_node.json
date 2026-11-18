@@ -1,0 +1,206 @@
+{
+  "date": "2026-11-18T23:02:02.560Z",
+  "environment": "JavaScript (один поток); виртуальный массив 512×512, без UI",
+  "warmup": true,
+  "repeats": "3 (основной стресс), 2 (графики); медиана",
+  "seed": [
+    "0x4a31b",
+    "0x9fab7"
+  ],
+  "full": [
+    {
+      "id": "step",
+      "label": "Пошаговый",
+      "count": 100000,
+      "ms": 52.231,
+      "throughput": 1914576.7
+    },
+    {
+      "id": "dda",
+      "label": "ЦДА",
+      "count": 100000,
+      "ms": 53.868,
+      "throughput": 1856403.1
+    },
+    {
+      "id": "bres",
+      "label": "Брезенхем",
+      "count": 100000,
+      "ms": 32.359,
+      "throughput": 3090345
+    },
+    {
+      "id": "wu",
+      "label": "Ву (Wu)",
+      "count": 100000,
+      "ms": 94.995,
+      "throughput": 1052691.5
+    },
+    {
+      "id": "circle",
+      "label": "Брезенхем (окружность)",
+      "count": 50000,
+      "ms": 197.929,
+      "throughput": 252615.4
+    }
+  ],
+  "countSeries": [
+    {
+      "n": 1000,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 0.903
+    },
+    {
+      "n": 1000,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 0.693
+    },
+    {
+      "n": 10000,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 6.314
+    },
+    {
+      "n": 10000,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 3.549
+    },
+    {
+      "n": 25000,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 14.274
+    },
+    {
+      "n": 25000,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 8.381
+    },
+    {
+      "n": 50000,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 27.751
+    },
+    {
+      "n": 50000,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 16.877
+    },
+    {
+      "n": 100000,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 54.524
+    },
+    {
+      "n": 100000,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 36.765
+    }
+  ],
+  "lengthSeries": [
+    {
+      "length": 10,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 3.118,
+      "n": 20000
+    },
+    {
+      "length": 10,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 1.842,
+      "n": 20000
+    },
+    {
+      "length": 25,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 7.239,
+      "n": 20000
+    },
+    {
+      "length": 25,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 3.703,
+      "n": 20000
+    },
+    {
+      "length": 50,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 11.349,
+      "n": 20000
+    },
+    {
+      "length": 50,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 6.682,
+      "n": 20000
+    },
+    {
+      "length": 75,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 17.142,
+      "n": 20000
+    },
+    {
+      "length": 75,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 9.833,
+      "n": 20000
+    },
+    {
+      "length": 100,
+      "method": "dda",
+      "label": "ЦДА",
+      "ms": 21.75,
+      "n": 20000
+    },
+    {
+      "length": 100,
+      "method": "bres",
+      "label": "Брезенхем",
+      "ms": 13.737,
+      "n": 20000
+    }
+  ],
+  "circleCountSeries": [
+    {
+      "n": 1000,
+      "ms": 6.615
+    },
+    {
+      "n": 10000,
+      "ms": 42.418
+    },
+    {
+      "n": 25000,
+      "ms": 99.44
+    },
+    {
+      "n": 50000,
+      "ms": 179.383
+    }
+  ],
+  "system": {
+    "runtime": "v22.16.0",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "memoryGB": 6.24
+  }
+}

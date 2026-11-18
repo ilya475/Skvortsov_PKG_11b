@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Лабораторная работа № 4. Растеризация: пошаговый, ЦДА, Брезенхем, Ву, Кастл–Питвей и воспроизводимый бенчмарк." />
+  <title>Лабораторная № 4 — Растровые алгоритмы | Скворцов Илья</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<div class="app">
+  <header class="masthead">
+    <div class="topbar">
+      <a href="#lab" class="brand" aria-label="На главную"><span class="brand-mark">◩</span><span>PIXEL<span class="brand-muted">/</span>LAB <small>04</small></span></a>
+      <nav class="nav" aria-label="Навигация">
+        <a href="#lab">Алгоритмы</a><a href="#benchmark">Бенчмарк</a><a href="#about">Методика</a>
+      </nav>
+      <div class="author-tag">Скворцов Илья · БГУ · 2026</div>
+    </div>
+    <div class="hero">
+      <div class="eyebrow"><span class="live-dot"></span> Компьютерная графика / Лабораторная работа № 4</div>
+      <h1>Геометрия,<br/><em>собранная из пикселей.</em></h1>
+      <p>Исследуй алгоритмы растеризации отрезков и кривых: управляй координатами, смотри каждый шаг, сравнивай точность и измеряй скорость без влияния интерфейса.</p>
+      <div class="hero-chips"><span>4 обязательных алгоритма</span><span>8 октантов</span><span>Ву + Кастл–Питвей</span><span>150 000 примитивов</span></div>
+    </div>
+  </header>
+
+  <main id="lab" class="main">
+    <section class="section-heading"><div><span class="section-index">01 / ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ</span><h2>Построение на дискретной сетке</h2><p>Алгоритм изменяет только матрицу интенсивностей. Экран получает результат <strong>после</strong> завершения вычислений.</p></div><div class="section-tag">RasterEngine → VirtualGrid → GridPainter</div></section>
+    <div class="workspace">
+      <aside class="controls panel">
+        <div class="panel-title"><span class="circle-number">1</span><h3>Алгоритм</h3></div>
+        <div class="algorithm-list" role="group" aria-label="Выберите алгоритм">
+          <button data-algo="step" class="algo-btn" type="button"><span class="algo-icon">01</span><span><b>Пошаговый</b><small>Независимый расчёт точек</small></span></button>
+          <button data-algo="dda" class="algo-btn" type="button"><span class="algo-icon">02</span><span><b>ЦДА / DDA</b><small>Дробные приращения</small></span></button>
+          <button data-algo="bres" class="algo-btn selected" type="button"><span class="algo-icon">03</span><span><b>Брезенхем · отрезок</b><small>Целочисленная ошибка</small></span></button>
+          <button data-algo="circle" class="algo-btn" type="button"><span class="algo-icon">04</span><span><b>Брезенхем · окружность</b><small>Симметрия 8 точек</small></span></button>
+          <button data-algo="wu" class="algo-btn" type="button"><span class="algo-icon">05</span><span><b>Ву / Wu</b><small>Честная прозрачность Alpha</small></span></button>
+          <button data-algo="ellipse" class="algo-btn" type="button"><span class="algo-icon">06</span><span><b>Кастл–Питвей · эллипс</b><small>Инкрементальная коника</small></span></button>
+          <button data-algo="parabola" class="algo-btn" type="button"><span class="algo-icon">07</span><span><b>Кастл–Питвей · дуга</b><small>Параболический сплайн</small></span></button>
+        </div>
+        <div class="line-separator"></div>
+        <div class="panel-title"><span class="circle-number">2</span><h3>Параметры</h3></div>
+        <div id="line-fields" class="field-group">
+          <div class="field-help">Начальная и конечная точки</div>
+          <div class="field-row"><label>X₀<input id="x0" type="number" step="1" value="-15" /></label><label>Y₀<input id="y0" type="number" step="1" value="-8" /></label></div>
+          <div class="field-row"><label>X₁<input id="x1" type="number" step="1" value="15" /></label><label>Y₁<input id="y1" type="number" step="1" value="9" /></label></div>
+          <button id="octant-btn" type="button" class="soft-button">↗ Следующий из 8 октантов</button>
+        </div>
+        <div id="circle-fields" class="field-group hidden">
+          <div class="field-help">Центр окружности и радиус</div>
+          <div class="field-row"><label>Xc<input id="circle-x" type="number" value="0" step="1" /></label><label>Yc<input id="circle-y" type="number" value="0" step="1" /></label></div>
+          <label class="full-field">Радиус r<input id="radius" type="number" min="0" max="500" value="14" step="1" /></label>
+        </div>
+        <div id="ellipse-fields" class="field-group hidden">
+          <div class="field-help">Центр, полуоси и поворот</div>
+          <div class="field-row"><label>Xc<input id="ellipse-x" type="number" value="0" step="1" /></label><label>Yc<input id="ellipse-y" type="number" value="0" step="1" /></label></div>
+          <div class="field-row"><label>Полуось a<input id="ellipse-a" type="number" min="1" value="15" step="1" /></label><label>Полуось b<input id="ellipse-b" type="number" min="1" value="9" step="1" /></label></div>
+          <label class="full-field">Поворот, °<select id="ellipse-angle"><option value="0">0°</option><option value="30">30°</option><option value="45">45°</option><option value="60">60°</option><option value="90">90°</option></select></label>
+        </div>
+        <div id="parabola-fields" class="field-group hidden">
+          <div class="field-help">Начало P₀, контроль Pс и конец P₁</div>
+          <div class="field-row"><label>X₀<input id="para-x0" type="number" value="-17" step="1" /></label><label>Y₀<input id="para-y0" type="number" value="-9" step="1" /></label></div>
+          <div class="field-row"><label>Xc<input id="para-xc" type="number" value="0" step="1" /></label><label>Yc<input id="para-yc" type="number" value="16" step="1" /></label></div>
+          <div class="field-row"><label>X₁<input id="para-x1" type="number" value="17" step="1" /></label><label>Y₁<input id="para-y1" type="number" value="-9" step="1" /></label></div>
+        </div>
+        <p id="input-error" class="error-text" role="alert" aria-live="polite"></p>
+        <button id="draw-btn" type="button" class="primary-button">Построить растр <span>↗</span></button>
+        <div class="line-separator"></div>
+        <div class="panel-title"><span class="circle-number">3</span><h3>Масштаб и режим</h3></div>
+        <label class="range-label" for="zoom">Размер пикселя <strong id="zoom-value">16 px</strong></label>
+        <input id="zoom" type="range" min="8" max="25" step="1" value="16" />
+        <div class="check-row"><label><input id="show-grid" type="checkbox" checked /> Линии сетки</label><label><input id="show-axes" type="checkbox" checked /> Оси и подписи</label></div>
+        <button id="clear-btn" type="button" class="soft-button">Очистить растр</button>
+      </aside>
+
+      <section class="visual-area">
+        <div class="raster-card panel">
+          <div class="raster-head"><div><div class="raster-eyebrow">VIRTUAL RASTER / 43 × 43</div><h3 id="active-title">Брезенхем · отрезок</h3></div><div class="mode-pill"><span class="live-dot"></span> Целочисленная сетка</div></div>
+          <div class="canvas-wrap"><div class="canvas-surface"><canvas id="raster" aria-label="Координатная сетка и увеличенные растровые пиксели"></canvas></div></div>
+          <div class="raster-footer"><span><i class="legend-square pixel"></i> Заполненный пиксель</span><span><i class="legend-square axis"></i> Оси X / Y</span><span><i class="legend-square grid"></i> Границы ячеек</span></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat"><span>Закрашено ячеек</span><strong id="pixel-count">0</strong><small>Ненулевая интенсивность</small></div>
+          <div class="stat"><span>Записей в растр</span><strong id="pixel-writes">0</strong><small>С учётом симметрий</small></div>
+          <div class="stat"><span>Шагов алгоритма</span><strong id="step-count">0</strong><small>Траектория / итерации</small></div>
+          <div class="stat"><span>Текущий октант</span><strong id="octant-info">—</strong><small>Для выбранного отрезка</small></div>
+        </div>
+        <div class="steps-card panel">
+          <div class="steps-header"><div><span class="section-index">ПРОВЕРКА ВЫЧИСЛЕНИЙ</span><h3>Пошаговый разбор</h3></div><div class="step-actions"><button id="prev-step" class="icon-button" title="На шаг назад">←</button><button id="next-step" class="icon-button" title="На шаг вперёд">→</button><button id="play-steps" class="outline-button">▶ Анимация</button><button id="full-render" class="outline-button">Все шаги</button></div></div>
+          <div class="steps-progress"><div id="steps-progress-fill"></div></div>
+          <div id="step-explain" class="step-note">Нажмите «Построить растр» для получения таблицы расчётов.</div>
+          <div class="table-scroll"><table class="steps-table"><thead><tr id="steps-headers"><th>k</th><th>x</th><th>y</th><th>Ошибка / дробная часть</th></tr></thead><tbody id="steps-tbody"></tbody></table></div>
+          <div class="raster-footnote">Ограничение отображения: первые 12 шагов таблицы; анимация доступна для всех шагов. Допустимые целые координаты лежат в центрах клеток.</div>
+        </div>
+      </section>
+    </div>
+
+    <section id="benchmark" class="benchmark-section">
+      <div class="section-heading"><div><span class="section-index">02 / ПРОИЗВОДИТЕЛЬНОСТЬ</span><h2>Стресс-тест в реальном времени</h2><p>100 000 отрезков во всех 8 октантах и 50 000 окружностей. Измеряется только вычисление и заполнение виртуального растра.</p></div><div class="section-tag">performance.now() · Worker</div></div>
+      <div class="benchmark-top panel"><div><h3>Реальные измерения на вашем устройстве</h3><p>Графики строятся по результатам запуска здесь и сейчас. Разогрев перед замером; медиана 3 проходов для основного теста, 2 проходов для графиков.</p></div><div class="benchmark-actions"><button id="benchmark-btn" class="primary-button">Запустить 150 000 примитивов <span>↗</span></button><button id="export-btn" class="soft-button" disabled>Экспорт CSV</button></div></div>
+      <div id="bench-status" class="bench-status" role="status" aria-live="polite">Готов к тестированию. Во время вычислений интерфейс останется отзывчивым благодаря Web Worker.</div>
+      <div class="benchmark-metrics" id="bench-metrics"><div class="metric"><span>Отрезки</span><strong>100 000</strong><small>4 алгоритма</small></div><div class="metric"><span>Окружности</span><strong>50 000</strong><small>Радиусы 2–32 px</small></div><div class="metric"><span>Октанты</span><strong>8 / 8</strong><small>Равные группы</small></div></div>
+      <div class="charts-grid"><article class="chart-card panel"><div class="chart-card-head"><h3>Время / количество отрезков</h3><p>1 000 → 100 000, мс · ЦДА и Брезенхем</p></div><div id="count-chart" class="chart-placeholder">Появится после бенчмарка</div></article><article class="chart-card panel"><div class="chart-card-head"><h3>Время / длина отрезка</h3><p>20 000 отрезков фиксированной длины, мс</p></div><div id="length-chart" class="chart-placeholder">Появится после бенчмарка</div></article></div>
+      <article class="chart-card panel circle-chart-card"><div class="chart-card-head"><h3>Окружности / количество</h3><p>От 1 000 до 50 000 окружностей; только вычисления без Canvas</p></div><div id="circle-chart" class="chart-placeholder">Появится после бенчмарка</div></article>
+      <div class="table-scroll benchmark-table-wrap"><table class="bench-table"><thead><tr><th>Алгоритм</th><th>Примитивов</th><th>Медиана времени</th><th>Примитивов / секунду</th></tr></thead><tbody id="bench-tbody"><tr><td colspan="4">Выполните стресс-тест, чтобы заполнить таблицу реальными данными.</td></tr></tbody></table></div>
+    </section>
+
+    <section id="about" class="about-section"><div class="section-heading"><div><span class="section-index">03 / МАТЕМАТИКА И АРХИТЕКТУРА</span><h2>Что происходит внутри</h2><p>Классическая модель «числа → дискретные пиксели», без готовых команд рисования геометрии.</p></div></div><div class="about-grid"><div class="about-card"><div class="about-symbol">∑</div><h3>ЦДА и Брезенхем</h3><p>n = max(|Δx|, |Δy|); ЦДА изменяет дробные x и y, Брезенхем обновляет целочисленную управляющую ошибку.</p><code>e = Δx − Δy; e₂ = 2e</code></div><div class="about-card"><div class="about-symbol">α</div><h3>Сглаживание Ву</h3><p>Два соседних пикселя получают дополняющие значения яркости из дробной части идеальной координаты.</p><code>α₀ = 1 − frac(y); α₁ = frac(y)</code></div><div class="about-card"><div class="about-symbol">ƒ</div><h3>Кастл–Питвей</h3><p>Коника задаётся неявным уравнением, знаки конечных разностей определяют направление следующего пиксельного шага.</p><code>F = Ax² + Bxy + Cy² + Dx + Ey + G</code></div></div>
+      <div class="method-detail panel"><h3>Привязка координат к растру</h3><p>Индекс столбца <strong>i = x + Oₓ</strong>, индекс строки <strong>j = Oᵧ − y</strong>, где (Oₓ, Oᵧ) — положение начала координат в массиве. Внешний вид отделён от алгоритма: <strong>RasterEngine</strong> вызывает только <strong>setPixel(x, y, intensity)</strong>, <strong>VirtualGrid</strong> сохраняет Uint8Array, а <strong>GridPainter</strong> отображает каждую ячейку увеличенным квадратом через fillRect. Использование lineTo(), arc(), ellipse(), stroke() для построения исследуемых фигур исключено.</p></div>
+    </section>
+  </main>
+  <footer><span>PIXEL/LAB 04 · Лабораторная работа по компьютерной графике</span><span>Скворцов Илья · Минск, 2026</span></footer>
+</div>
+<script type="module" src="./src/app.js"></script>
+</body></html>
