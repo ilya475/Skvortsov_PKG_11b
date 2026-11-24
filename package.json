@@ -1,0 +1,9 @@
+{
+  "name":"lab3-image-processing-skvorcov",
+  "private":true,
+  "version":"1.0.0",
+  "type":"module",
+  "description":"ЛР №3: ручная цифровая обработка изображений на JavaScript",
+  "scripts":{"test":"node --test tests/algorithms.test.mjs"},
+  "license":"MIT"
+}

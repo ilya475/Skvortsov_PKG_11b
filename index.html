@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Лабораторная работа №3: собственные алгоритмы цифровой обработки изображений на JavaScript, сравнительные гистограммы, Web Workers и экспериментальный отчёт.">
+  <title>ЛР №3 • Цифровая обработка изображений • Скворцов Илья</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="src/app.js"></script>
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <header class="masthead">
+    <div class="wrap topbar">
+      <a href="index.html" class="brand"><span class="brandmark">∑</span><span>PIXEL<span class="brand-light">LAB</span><small>Лабораторная № 03</small></span></a>
+      <nav aria-label="Навигация"><a class="active" href="index.html">Эксперимент</a><a href="report.html">Отчёт</a><a href="report/Отчет_Скворцов_Илья_ЛР3.pdf">PDF-версия</a><a href="README.md">Исходники и запуск</a></nav>
+      <span class="top-id">Группа 11 <span class="dot"></span> Скворцов Илья</span>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="hero">
+      <p class="eyebrow"><span class="eyebrow-line"></span> ИНТЕРАКТИВНЫЙ ЛАБОРАТОРНЫЙ СТЕНД</p>
+      <h1>Основы обработки<br><em>цифровых изображений.</em></h1>
+      <p class="lead">Алгоритмы реализованы вручную над байтовым RGBA-буфером. Сравнивайте методы, изучайте гистограммы и проверяйте работу на специально подготовленных изображениях.</p>
+      <div class="hero-stats"><span><strong>32</strong> алгоритма</span><span><strong>10</strong> тестовых изображений</span><span><strong>2–4</strong> параллельных потока</span><span><strong>0</strong> внешних библиотек в веб-приложении</span></div>
+    </section>
+    <section class="workspace" aria-labelledby="workspace-title">
+      <div class="sectionline"><div><p class="eyebrow">01 / НАСТРОЙКА</p><h2 id="workspace-title">Лабораторный стенд</h2></div><span class="section-note">Все вычисления — на стороне браузера</span></div>
+      <div class="workgrid">
+        <aside class="panel controls">
+          <div class="control-header"><span class="control-index">A</span><div><h3>Выбор метода</h3><p>Восемь семейств методов обработки</p></div></div>
+          <label class="field-label" for="method">Алгоритм</label><select id="method" class="field-select"></select>
+          <div class="method-summary"><span id="method-tag">Выбранный алгоритм</span><p id="method-hint"></p></div>
+          <div class="control-divider"></div>
+          <h3 class="smalltitle">Параметры эксперимента</h3>
+          <div id="params" class="params"></div>
+          <label class="field-label" for="border">Обработка края изображения</label>
+          <select id="border" class="field-select"><option value="reflect">Reflect — зеркальное отражение</option><option value="clamp">Clamp — граничный пиксель</option></select>
+          <label class="field-label" for="workers">Параллельные вычисления (Box / Gaussian)</label>
+          <select id="workers" class="field-select"><option value="1">1 Web Worker</option><option value="2">2 Web Workers</option><option value="4" selected>4 Web Workers</option></select>
+          <p class="microhint">Для остальных методов используется один фоновый поток. Размер исходного изображения не изменяется.</p>
+          <button id="run" class="primary"><span class="play">▶</span> Обработать изображение <span class="button-arrow">↗</span></button>
+          <div class="progress-block" id="progress-wrap" hidden><div class="progress-caption"><span id="progress-status">Выполнение...</span><span id="progress-percent">0%</span></div><progress id="progress" max="100" value="0"></progress></div>
+          <div id="status" class="status" role="status" aria-live="polite">Загрузите тестовое изображение или свой файл.</div>
+          <div class="method-theory"><h4>Что делает этот метод?</h4><p id="method-explain"></p></div>
+        </aside>
+        <div class="visual-area">
+          <div class="visual-toolbar"><div class="visual-tab"><span class="tab-circle"></span> Визуальное сравнение <span id="image-size" class="image-size">—</span></div><div class="action-row"><button class="ghost" id="download" disabled>↓ Скачать PNG</button><button class="ghost" id="restore" disabled>↺ Сбросить</button></div></div>
+          <div class="compare">
+            <article class="image-card"><div class="image-top"><span class="image-kicker">ORIGINAL / 01</span><strong>Исходное изображение</strong></div><div class="canvas-wrap" id="original-wrap"><canvas id="original" aria-label="Оригинал изображения"></canvas><span class="placeholder" id="original-placeholder">Изображение загружается…</span></div></article>
+            <article class="image-card"><div class="image-top"><span class="image-kicker after">PROCESSED / 02</span><strong>Результат обработки</strong></div><div class="canvas-wrap" id="result-wrap"><canvas id="result" aria-label="Результат обработки"></canvas><span class="placeholder" id="result-placeholder">Нажмите «Обработать изображение»</span></div></article>
+          </div>
+          <article id="aux-card" class="aux-card" hidden><div class="aux-info"><strong>Карта направлений градиента</strong><p>Цвет показывает θ = atan2(Gy, Gx), яркость — модуль градиента.</p></div><canvas id="aux" aria-label="Цветная карта направлений градиента"></canvas></article>
+          <div class="visual-foot"><span><span class="green-dot"></span> Ручной побайтовый доступ</span><span id="elapsed">Результат ещё не рассчитан</span></div>
+          <section class="chart-card" aria-labelledby="hist-heading"><div class="card-head"><div><p class="eyebrow">02 / ИЗМЕРЕНИЯ</p><h3 id="hist-heading">Гистограммы яркости</h3></div><span class="card-note">Общая линейная шкала • 256 уровней</span></div><div class="histgrid"><div><div class="chart-label"><span class="legend-dot before"></span> До обработки</div><canvas id="hist-before" width="650" height="232" aria-label="Гистограмма исходного изображения"></canvas></div><div><div class="chart-label"><span class="legend-dot after"></span> После обработки</div><canvas id="hist-after" width="650" height="232" aria-label="Гистограмма результата"></canvas></div></div><p class="hist-caption">Распределение вычисляется непосредственно из 8-битной яркости <code>Y = 0.2126R + 0.7152G + 0.0722B</code>.</p></section>
+          <section class="metrics-card"><div class="card-head"><div><p class="eyebrow">03 / АНАЛИЗ</p><h3>Числовые характеристики</h3></div><span class="card-note">Гистограммная оценка</span></div><div class="table-scroll"><table class="metrics-table"><thead><tr><th>Показатель</th><th>До</th><th>После</th><th>Изменение</th></tr></thead><tbody id="metrics"><tr><td colspan="4">Для сравнения выполните обработку изображения.</td></tr></tbody></table></div><p class="metric-note" id="extra-metrics">Энтропия не является универсальной мерой визуального качества: интерпретируйте её с учётом задачи и типа искажений.</p></section>
+        </div>
+      </div>
+    </section>
+    <section class="dataset" aria-labelledby="dataset-title"><div class="sectionline"><div><p class="eyebrow">04 / ТЕСТОВЫЕ ДАННЫЕ</p><h2 id="dataset-title">Выберите условия эксперимента</h2></div><label class="upload-button" for="upload">＋ Загрузить своё изображение <input type="file" id="upload" accept="image/png,image/jpeg,image/webp,image/bmp,image/gif" hidden></label></div><p class="section-description">Тестовые файлы созданы специально для исследования разных типов искажений. Нажмите на карточку, чтобы загрузить её без перезапуска.</p><div id="samples" class="sample-grid"></div></section>
+    <section class="footer-cta"><div><p class="eyebrow">05 / ДОКУМЕНТАЦИЯ</p><h2>Эксперимент, теория, результаты.</h2><p>В отчёте приведены математические формулы, реальные измерения, гистограммы «до / после», проверка гипотез, ограничения и развёрнутый вывод.</p></div><div class="cta-actions"><a class="primary anchor-button" href="report.html">Открыть отчёт ↗</a><a class="ghost anchor-button" href="report/Отчет_Скворцов_Илья_ЛР3.pdf">Отчёт в PDF ↓</a></div></section>
+  </main>
+  <footer><div class="wrap"><span>Лабораторная работа №3 · Основы обработки цифровых изображений</span><span>Скворцов Илья · группа 11 · 2026</span></div></footer>
+</body>
+</html>

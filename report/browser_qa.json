@@ -1,0 +1,19 @@
+{
+  "runtime": "Chromium 144, synthetic inline harness of unchanged module bodies, Blob Web Workers",
+  "gaussian_1680x1050_ms": {
+    "1": [
+      596.0,
+      662.0,
+      631.0
+    ],
+    "4": [
+      378.0,
+      423.0,
+      408.0
+    ]
+  },
+  "pixelMismatches_1worker_vs_4workers": 0,
+  "console_errors": [],
+  "methods": 32,
+  "samples": 10
+}
