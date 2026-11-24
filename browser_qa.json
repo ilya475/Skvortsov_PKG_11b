@@ -1,0 +1,25 @@
+{
+  "browser": "Chromium headless; QA-only inline bundle of the original module bodies and Blob workers",
+  "methods": 6,
+  "samples": 8,
+  "selfTestsPassed": 31,
+  "largeImage": "1680x1050",
+  "localMean31_ms": {
+    "1": [
+      103.4,
+      111.9,
+      140.1
+    ],
+    "4": [
+      100.8,
+      86.2,
+      84.8
+    ]
+  },
+  "medianMs": {
+    "1": 111.9,
+    "4": 86.2
+  },
+  "differentRgbaBytes_1vs4": 0,
+  "errors": []
+}

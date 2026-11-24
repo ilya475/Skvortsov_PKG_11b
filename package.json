@@ -1,0 +1,1 @@
+{"type":"module","private":true,"name":"lab3-skvorcov-simplified","scripts":{"test":"node --test tests/*.test.mjs"}}

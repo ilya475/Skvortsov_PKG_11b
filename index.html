@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Лабораторная работа №3. Линейное контрастирование, локальные пороги, Саувола, Оцу и CLAHE на JavaScript.">
+  <title>Лабораторная №3 — Скворцов Илья</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div><p class="kicker">Лабораторная работа №3 · Основы обработки изображений</p><h1>Обработка цифровых изображений</h1></div>
+      <div class="identity"><strong>Скворцов Илья</strong><span>Группа 11</span><a href="report.html">Открыть отчёт <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="card upload-card" aria-label="Выбор изображения">
+      <div class="form-control preset"><label for="sampleSelect">Тестовое изображение</label><select id="sampleSelect"></select></div>
+      <div class="upload-actions"><label class="btn btn-subtle file-btn" for="fileInput">Загрузить своё</label><input id="fileInput" type="file" accept="image/*" hidden><button class="btn btn-quiet" id="resetBtn" type="button">Сбросить</button></div>
+      <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Перетащите изображение или нажмите для выбора файла">Перетащите изображение сюда или нажмите</div>
+    </section>
+
+    <div class="workspace">
+      <aside class="card controls">
+        <div class="card-title"><div><span class="step">01 / Настройки</span><h2>Параметры обработки</h2></div></div>
+        <div class="form-control"><label for="mode">Метод</label><select id="mode">
+          <option value="linear">Линейное контрастирование</option>
+          <option value="local-mean">Локальный порог — среднее</option>
+          <option value="niblack">Локальный порог — Ниблэк</option>
+          <option value="sauvola">Адаптивный порог — Саувола</option>
+          <option value="otsu">Глобальный порог — Оцу</option>
+          <option value="clahe">CLAHE</option>
+        </select></div>
+        <p class="method-help" id="methodHelp">Растяжение диапазона яркости между двумя выбранными процентилями.</p>
+        <div class="control-block" id="contrastGroup">
+          <div class="control-heading"><label for="lowPercent">Диапазон процентилей</label><b id="contrastLabel">2% – 98%</b></div>
+          <div class="range-group"><span>Нижняя граница</span><input id="lowPercent" type="range" min="0" max="30" step="1" value="2"><span>Верхняя граница</span><input id="highPercent" type="range" min="70" max="100" step="1" value="98"></div>
+        </div>
+        <div class="control-block hidden" id="windowGroup"><div class="control-heading"><label for="windowSize">Размер локального окна</label><b id="windowLabel">21 × 21</b></div><input id="windowSize" type="range" min="3" max="51" step="2" value="21"></div>
+        <div class="control-block hidden" id="kGroup"><div class="control-heading"><label for="kRange">Коэффициент k</label><b id="kLabel">−0,20</b></div><input id="kRange" type="range" min="-0.6" max="0.6" step="0.01" value="-0.2"></div>
+        <div class="control-block hidden" id="rGroup"><div class="control-heading"><label for="rRange">Нормировка R</label><b id="rLabel">128</b></div><input id="rRange" type="range" min="32" max="255" step="1" value="128"></div>
+        <div class="control-block hidden" id="claheGroup"><div class="control-heading"><label for="tilesRange">Тайлов по стороне</label><b id="tilesLabel">8 × 8</b></div><input id="tilesRange" type="range" min="2" max="12" step="1" value="8"><div class="control-heading second"><label for="clipRange">Clip limit</label><b id="clipLabel">2,0</b></div><input id="clipRange" type="range" min="0.5" max="8" step="0.5" value="2"></div>
+        <div class="form-control hidden" id="borderGroup"><label for="borderMode">Края изображения</label><select id="borderMode"><option value="reflect">Reflect — отражение</option><option value="clamp">Clamp — повтор края</option></select></div>
+        <div class="form-control hidden" id="threadsGroup"><label for="threads">Рабочие потоки (для больших кадров)</label><select id="threads"><option value="auto">Автоматически</option><option value="1">1 поток</option><option value="2">2 потока</option><option value="4">4 потока</option></select></div>
+        <button id="processBtn" class="btn btn-primary" type="button">Обработать изображение</button>
+        <button id="downloadBtn" class="btn btn-subtle" type="button" disabled>Скачать результат PNG</button>
+        <div class="status" role="status" aria-live="polite"><span id="spinner" class="status-dot"></span><span id="status">Выберите метод и нажмите «Обработать».</span></div>
+        <p class="fineprint">Обработка выполняется вручную над пикселями в Web Workers, без OpenCV и готовых фильтров Canvas. Результат отображается в оттенках серого.</p>
+      </aside>
+
+      <section class="card results">
+        <div class="results-heading"><div><span class="step">02 / Эксперимент</span><h2>Сравнение изображений</h2><p id="sourceLabel" class="muted">Источник: —</p></div><div class="metrics"><span><b id="pixelCount">—</b><small>пикселей</small></span><span><b id="elapsed">—</b><small>время</small></span><span><b id="thresholdInfo">—</b><small>порог / режим</small></span></div></div>
+        <div class="previews">
+          <figure><figcaption>До обработки</figcaption><div class="image-frame"><canvas id="beforeCanvas" aria-label="Исходное изображение"></canvas></div></figure>
+          <figure><figcaption>После обработки</figcaption><div class="image-frame"><canvas id="afterCanvas" aria-label="Результат обработки"></canvas></div></figure>
+        </div>
+        <div class="statline"><div><small>Средняя яркость</small><b id="meanPair">—</b></div><div><small>Стандартное отклонение</small><b id="sdPair">—</b></div><div><small>P5–P95</small><b id="rangePair">—</b></div></div>
+        <div class="hist-head"><div><span class="step">03 / Анализ</span><h3>Гистограммы яркости</h3></div><span class="muted">Общая шкала Y для корректного сравнения</span></div>
+        <div class="histograms"><figure><figcaption>Исходная</figcaption><canvas id="histBefore" width="560" height="190"></canvas></figure><figure><figcaption>Результат</figcaption><canvas id="histAfter" width="560" height="190"></canvas></figure></div>
+      </section>
+    </div>
+
+    <section class="details-row">
+      <details class="card detail" id="protocolPanel"><summary><span><b>Тестовая база и экспериментальный протокол</b><small>8 подготовленных изображений, цели, методы и измерения</small></span><span class="chevron">⌄</span></summary><div id="protocolContent" class="detail-content"><p class="muted">Нажмите, чтобы увидеть протокол экспериментов.</p></div></details>
+      <details class="card detail" id="testsPanel"><summary><span><b>Проверка алгоритмов</b><small>Контрольные вычисления и тесты сходимости потоков</small></span><span class="chevron">⌄</span></summary><div class="detail-content"><button id="runTests" class="btn btn-subtle" type="button">Запустить проверки</button><div id="testResults" class="test-results">Проверки не запускались.</div><p class="fineprint">Полный набор проверок доступен также командой <code>npm test</code> из корня проекта.</p></div></details>
+    </section>
+    <footer class="footer">Скворцов Илья · Группа 11 · ЛР №3 · <a href="report.html">Отчёт</a> · <a href="report/Отчет_Скворцов_Илья_ЛР3.pdf">PDF</a></footer>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
